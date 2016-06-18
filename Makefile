@@ -1,6 +1,8 @@
+INCLUDES=header.inc defines.inc
+
 all: game.gb
 
-%.obj: %.asm header.inc
+%.obj: %.asm $(INCLUDES)
 	rgbasm -o$@ $<
 
 game.gb: main.obj

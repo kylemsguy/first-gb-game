@@ -1,3 +1,4 @@
+INCLUDE "defines.inc"
 SECTION "rom", HOME
 INCLUDE "header.inc" ; Include cartrdige boot header
 
@@ -13,8 +14,16 @@ main:
 
 	ldh [$23], A ; disable counter
 
-	ld A, $F0
-	ldh [$21], A ; set noise volume and disable envelope
+	;ld A, $F0
+	;ldh [$21], A ; set noise volume and disable envelope
+
+	ld A, $11
+	ldh [$06], A ; load TMA
+
+	ld A, $04
+	ldh [$07], A ; load TAC
+
+	call MUSIC_INIT
 
 .loop:
     halt
@@ -22,7 +31,13 @@ main:
 
 draw:
 stat:
+	reti
 timer:
+	call SONG1_PLAYROUTINE
+	reti
 serial:
 joypad:
     reti
+
+SECTION   "CoolStuff",ROM0[$0500]
+INCBIN "zinnia.gbs", $70, $4d9
