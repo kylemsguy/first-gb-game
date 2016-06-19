@@ -10,4 +10,4 @@ game.gb: main.obj
 	rgbfix -p0 -v game.gb
 
 clean:
-	rm -f *.obj *.map *.sym *.gb
+	rm -f *.obj *.map *.sym game.gb
