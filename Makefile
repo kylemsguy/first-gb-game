@@ -1,4 +1,4 @@
-INCLUDES=header.inc defines.inc
+INCLUDES=header.inc defines.inc music_routines.inc
 
 all: game.gb
 
