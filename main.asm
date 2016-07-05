@@ -4,11 +4,20 @@ INCLUDE "header.inc" ; Include cartrdige boot header
 
 ; $0150: Code!
 main:
-	call DEFLEMASK_MUSIC_INIT
+	;call DEFLEMASK_MUSIC_INIT
 	;call init_music_ram
+
+	; Wait for VBLANK
+	call wait_vblank
+	ld A, [$FF40] ; get LCD control register
+	and $7F
+	ld [$FF40], A ; disable LCD
+
+	; Set up VBLANK
 	ldh A, [INT_ENABLE] ; Get status of interrupt enable register
 	OR 1 ; enable VBLANK
 	ldh [INT_ENABLE], A
+	call init_snek
 
 .loop:
     ; TODO do stuff with button press
@@ -64,6 +73,15 @@ end_handle_joypad:
 update_pos:
 	ret
 
+wait_vblank:
+	push AF
+.vblank_loop:
+	ldh A, [$FF44] ; get LY status
+	sub 144 ; decrement by 144(decimal)
+	jr c, .vblank_loop
+	pop AF
+	ret
+
 init_snek:
 	; initialize snake code
 	; Copy all tiles to char mem
@@ -71,12 +89,12 @@ init_snek:
 	ld BC, 	$8000 ; destination pointer
 	ld A, 7 ; we plan on copying 7 sprites
 do_cpy:
-	ld C, A ; store the accumulator
+	ld D, A ; store the accumulator
 	ld A, [HL] ; copy byte into register B
 	ld [BC], A ; copy byte into charmem
 	inc HL ; increment pointer
 	inc BC ; increment pointer
-	ld A, C ; restore counter
+	ld A, D ; restore counter
 	dec A ; decrement counter
 	jp NZ, do_cpy ; loop
 	ret
