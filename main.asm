@@ -4,7 +4,7 @@ INCLUDE "header.inc" ; Include cartrdige boot header
 
 ; $0150: Code!
 main:
-	call MUSIC_INIT
+	call DEFLEMASK_MUSIC_INIT
 	;call init_music_ram
 	ldh A, [INT_ENABLE] ; Get status of interrupt enable register
 	OR 1 ; enable VBLANK
@@ -13,6 +13,7 @@ main:
 .loop:
     ; TODO do stuff with button press
     halt
+   	call update_pos
 	call handle_joypad
     jr .loop
 
@@ -44,7 +45,7 @@ draw: ; VBLANK
 stat:
 	reti
 timer:
-	call SONG1_PLAYROUTINE
+	;call SONG1_PLAYROUTINE
 	;call playroutine
 	reti
 serial:
@@ -53,27 +54,34 @@ joypad:
     reti
 
 handle_joypad:
-	ld A, [$C100]
-	and $8          ; Get state of start button
-	jr Z, end_handle_joypad ; skip if start button not pressed
-	ldh A, [SOUND_ENABLE] ; get the sound enable status
-	and $80
-	jr Z, enable_sound
-	ld A, $0
-	ldh [SOUND_ENABLE], A
-	jr end_handle_joypad
-enable_sound:
-	;ld A, $8F ; set sound enable
-	;ldh [SOUND_ENABLE], A
-	call MUSIC_INIT
+	; code goes here
 end_handle_joypad:
+	ld [$C101], A ; store current val as previous
 	xor A
-	ld [$C100], A
+	ld [$C100], A ; clear 
+	ret
+
+update_pos:
 	ret
 
 init_snek:
 	; initialize snake code
+	; Copy all tiles to char mem
+	ld HL, TileLabel ; init pointer to char mem
+	ld BC, 	$8000 ; destination pointer
+	ld A, 7 ; we plan on copying 7 sprites
+do_cpy:
+	ld C, A ; store the accumulator
+	ld A, [HL] ; copy byte into register B
+	ld [BC], A ; copy byte into charmem
+	inc HL ; increment pointer
+	inc BC ; increment pointer
+	ld A, C ; restore counter
+	dec A ; decrement counter
+	jp NZ, do_cpy ; loop
 	ret
 
-SECTION   "CoolStuff",ROM0[$0500]
-INCBIN "zinnia.gbs", $70, $1d89
+INCLUDE "sprites.inc" 
+
+;SECTION   "CoolStuff",ROM0[$0500]
+;INCBIN "zinnia.gbs", $70, $1d89
